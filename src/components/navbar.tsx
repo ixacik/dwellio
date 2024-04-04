@@ -1,11 +1,21 @@
 import { NAV_LINKS } from "@/lib/constants";
-import { UserButton } from "@clerk/nextjs";
+import {
+  ClerkLoaded,
+  ClerkLoading,
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "./ui/button";
+import { Loader, Loader2 } from "lucide-react";
 
 const Navbar = () => {
   return (
-    <nav className="padding py-6 w-full sticky inset-0 bottom-auto bg-white border-b-black/25 text-white shadow-xl flex justify-between items-center">
+    <nav className="padding h-20 w-full sticky inset-0 bottom-auto bg-white text-white shadow-xl flex justify-between items-center">
       <Link href={"/"}>
         <Image src="/dwelio-logo.svg" width={129} height={35} alt="logo" />
       </Link>
@@ -15,7 +25,27 @@ const Navbar = () => {
             <li>{link.label}</li>
           </Link>
         ))}
-        <UserButton />
+        <div className="flex items-center gap-2">
+          <ClerkLoading>
+            <Loader
+              size={20}
+              className="mx-auto animate-spin text-muted-foreground"
+            />
+          </ClerkLoading>
+          <ClerkLoaded>
+            <SignedIn>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
+            <SignedOut>
+              <Button asChild>
+                <SignUpButton mode="modal">Sign Up</SignUpButton>
+              </Button>
+              <Button variant={"secondary"} asChild>
+                <SignInButton mode="modal">Log In</SignInButton>
+              </Button>
+            </SignedOut>
+          </ClerkLoaded>
+        </div>
       </ul>
     </nav>
   );
