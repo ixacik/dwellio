@@ -1,12 +1,8 @@
 import ListingCard from "@/components/listing-card";
 import ListingViewMoreCard from "@/components/listing-view-more-card";
 import SearchForm from "@/components/search-form";
-import { db } from "@/db";
-import { users, usersInsert } from "@/db/schema";
 import { listings } from "@/lib/constants";
-import { currentUser } from "@clerk/nextjs";
 import { Flame, Heart } from "lucide-react";
-import { redirect } from "next/navigation";
 
 export default async function Home() {
   return (
