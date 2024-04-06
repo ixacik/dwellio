@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { usersInsert } from "@/db/schema";
-import { createUser } from "@/lib/user.actions";
+import { createUser, deleteUser, updateUser } from "@/lib/user.actions";
 
 export async function POST(req: Request) {
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
@@ -59,16 +59,44 @@ export async function POST(req: Request) {
   console.log("Webhook body:", body);
 
   // create a new user with the data in my database
-  if (eventType === "user.created") {
-    try {
-      const { id, email_addresses, first_name, last_name } = payload.data;
-      const user: usersInsert = {
-        clerkId: id,
-        email: email_addresses[0].email_address,
-        name: `${first_name} ${last_name}`,
-      };
-      await createUser(user);
-    } catch (error) {}
+  switch (eventType) {
+    case "user.created":
+      try {
+        const { id, email_addresses, primary_email_address_id } = evt.data;
+        const user: usersInsert = {
+          clerkId: id,
+          email: email_addresses.find(
+            (address) => address.id === primary_email_address_id
+          )!.email_address,
+        };
+        await createUser(user);
+      } catch (error) {
+        console.error("Error creating user:", error);
+      }
+      break;
+    case "user.updated":
+      try {
+        const { id, email_addresses, primary_email_address_id } = evt.data;
+        const user: usersInsert = {
+          clerkId: id,
+          email: email_addresses.find(
+            (address) => address.id === primary_email_address_id
+          )!.email_address,
+        };
+        await updateUser(user);
+      } catch (error) {
+        console.error("Error updating user:", error);
+      }
+      break;
+    case "user.deleted":
+      try {
+        const { id } = evt.data;
+        await deleteUser({ clerkId: id });
+      } catch (error) {
+        console.error("Error deleting user:", error);
+      }
+    default:
+      break;
   }
 
   return new Response("", { status: 200 });
